@@ -1,0 +1,6 @@
+astral==3.2
+streamlit==1.49.*
+pandas==2.3.2
+plotly express
+plotly==6.0.0
+zoneinfo
