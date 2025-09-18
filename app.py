@@ -39,14 +39,14 @@ with col2:
                                 location.latitude,
                                 location.longitude)
 with col3:
-    st.write(location.address)
-    st.write(tz)
-    st.write(location.latitude, location.longitude)
+    st.write("city:", location.address)
+    st.write("timezone", tz)
+    st.write(f"coordinates: ({str(location.latitude)}, {str(location.longitude)})")
 
 # display map
 col1, col2, col3 = st.columns([1,3,1])
 with col2:
-    point = [{'latitude': lat, 'longitude': long}]
+    point = [{'latitude': location.latitude, 'longitude': location.longitude}]
     st.map(point, zoom=3, width=400, height=300, use_container_width=False)
 
 # define date
