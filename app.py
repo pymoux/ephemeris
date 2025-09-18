@@ -1,10 +1,11 @@
 import streamlit as st
 from astral import LocationInfo
 from astral.sun import sun
+from timezonefinder import TimezoneFinder
 from zoneinfo import ZoneInfo
 from datetime import date
 import pandas as pd
-#import plotly.express as px
+from geopy.geocoders import Nominatim
 import plotly.graph_objects as go
 
 
@@ -24,17 +25,23 @@ st.divider()
 
 # define location
 col1, col2, col3, col4 = st.columns(4)
-with col1:
-    city = st.text_input(label="City", value="Lentilly")
 with col2:
-    country = st.text_input(label="Country", value="France")
+    city = st.text_input(label="City", value="Lentilly")
+    geolocator = Nominatim(user_agent="geo_app")
+    location = geolocator.geocode(city)
+
+    tf = TimezoneFinder()
+    tz = tf.timezone_at(lng=location.longitude, lat=location.latitude)
+
+    city_request = LocationInfo(location.raw.get("display_name"),
+                                location.raw.get("address", {}).get("country", ""),
+                                tz,
+                                location.latitude,
+                                location.longitude)
 with col3:
-    timzon = st.text_input(label="Timezone", value="Europe/Paris")
-with col4:
-    coord = st.text_input(label="Coordinates", value="45.816669 4.66667")
-    lat = float(coord.split(" ")[0])
-    long = float(coord.split(" ")[1])
-location = LocationInfo(city, country, timzon, lat, long)
+    st.write(location.address)
+    st.write(tz)
+    st.write(location.latitude, location.longitude)
 
 # display map
 col1, col2, col3 = st.columns([1,3,1])
@@ -58,7 +65,7 @@ with col2:
 # create date and time dataframe
 dates = pd.date_range(start=f'1/1/{year[0]}', end=f'12/31/{year[0]}')
 df = dates.to_frame(index=False, name="date")
-df[["sunrise", "sunset", "sunrise_f", "sunset_f"]] = df.apply(lambda row: riseset(location, row['date']), axis=1, result_type='expand')
+df[["sunrise", "sunset", "sunrise_f", "sunset_f"]] = df.apply(lambda row: riseset(city_request, row['date']), axis=1, result_type='expand')
 
 # display chart
 fig = go.Figure()
